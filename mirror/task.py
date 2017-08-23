@@ -284,8 +284,6 @@ class Task(AbstractTask):
 
     def get_args(self, stage = 1):
         args  = [os.path.basename(self.command)]
-        if self.twostage == 3:
-            return self.args
         args += shlex.split(self.args)
         if self.twostage and stage == 2:
             args.remove("--delete")
@@ -315,8 +313,6 @@ class SimpleTask(AbstractTask):
 
     def get_args(self, stage = 1):
         args  = [os.path.basename(self.command)]
-        if self.twostage == 3:
-            return self.args
         if self.twostage and stage == 1:
             args += self.firststage.split(" ")
             return args

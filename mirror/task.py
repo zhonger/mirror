@@ -153,7 +153,10 @@ class AbstractTask(object):
             os.dup2(fp.fileno(), sys.stdout.fileno())
             os.dup2(fp.fileno(), sys.stderr.fileno())
             fp.close()
-            os.execv(self.command, self.get_args(stage))
+            if self.twostage == 3:
+                os.execv(self.command, self.args)
+            else:
+                os.execv(self.command, self.get_args(stage))
 
     def stop(self, signo = signal.SIGTERM):
         if self.pid > 0:
@@ -264,8 +267,8 @@ class Task(AbstractTask):
         try:
             self.upstream = taskinfo['upstream[]']
             self.rsyncdir = taskinfo['rsyncdir']
-            if self.rsyncdir[-1] != '/':
-                self.rsyncdir += '/'
+            #if self.rsyncdir[-1] != '/':
+            #    self.rsyncdir += '/'
             self.localdir = taskinfo['localdir']
             if not os.path.exists(self.localdir):
                 try:
@@ -281,6 +284,8 @@ class Task(AbstractTask):
 
     def get_args(self, stage = 1):
         args  = [os.path.basename(self.command)]
+        if self.twostage == 3:
+            return self.args
         args += shlex.split(self.args)
         if self.twostage and stage == 2:
             args.remove("--delete")
@@ -310,6 +315,8 @@ class SimpleTask(AbstractTask):
 
     def get_args(self, stage = 1):
         args  = [os.path.basename(self.command)]
+        if self.twostage == 3:
+            return self.args
         if self.twostage and stage == 1:
             args += self.firststage.split(" ")
             return args
